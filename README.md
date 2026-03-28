@@ -19,6 +19,10 @@
 
 	`uvicorn backend.main:app --reload --port 8000`
 
+	If 8000 is busy, use:
+
+	`uvicorn backend.main:app --reload --port 8001`
+
 5. Verify health:
 
 	`http://localhost:8000/health`
@@ -33,7 +37,7 @@
 
 	Create `frontend/.env` with:
 
-	`VITE_API_BASE_URL=http://localhost:8000`
+	`VITE_API_BASE_URL=http://localhost:8001`
 
 3. Run frontend:
 
@@ -70,6 +74,22 @@ You can trigger tasks from a Python shell once worker is up.
 - Call [backend/routes/signals.py](backend/routes/signals.py) via `GET /signals/latest`
 - Call [backend/routes/patterns.py](backend/routes/patterns.py) via `GET /patterns/INFY`
 - Use [frontend/src/pages/ChatAssistant.tsx](frontend/src/pages/ChatAssistant.tsx) to test `POST /chat`
+
+## Troubleshooting
+
+- If you see `Address already in use`, free the port:
+
+	`lsof -nP -iTCP:8001 -sTCP:LISTEN`
+
+	`kill <PID>`
+
+- If frontend command fails, use the correct script:
+
+	`npm run dev`
+
+	(not `npm runm dev`)
+
+- If backend infra variables are missing, the app serves fallback sample data so UI pages remain functional.
 
 ## Notes
 
