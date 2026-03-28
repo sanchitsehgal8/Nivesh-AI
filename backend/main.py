@@ -9,6 +9,7 @@ from backend.routes.chat import router as chat_router
 from backend.routes.patterns import router as patterns_router
 from backend.routes.portfolio import router as portfolio_router
 from backend.routes.signals import router as signals_router
+from backend.routes.trades import router as trades_router
 from backend.routes.video import router as video_router
 
 logging.basicConfig(level=logging.INFO)
@@ -28,6 +29,7 @@ app.include_router(patterns_router)
 app.include_router(chat_router)
 app.include_router(portfolio_router)
 app.include_router(video_router)
+app.include_router(trades_router)
 
 
 @app.get("/health")

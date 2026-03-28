@@ -1,4 +1,5 @@
 import { useEffect } from "react";
+import { useNavigate } from "react-router-dom";
 
 import { SignalCard } from "../components/SignalCard";
 import { SectorRotationChart } from "../components/SectorRotationChart";
@@ -6,6 +7,7 @@ import { useSignals } from "../hooks/useSignals";
 import { useAppStore } from "../store/useAppStore";
 
 export default function Dashboard() {
+  const navigate = useNavigate();
   const { data, isLoading } = useSignals();
   const setSignals = useAppStore((s) => s.setSignals);
   const signals = data ?? [];
@@ -90,9 +92,24 @@ export default function Dashboard() {
           <p className="text-xs text-slate-400">Post-Policy Market Strategy &amp; Support Levels</p>
         </div>
         <div className="mb-4 space-y-2 text-xs">
-          <button className="w-full rounded-lg border border-slate-700 px-3 py-2 text-left">What changed?</button>
-          <button className="w-full rounded-lg border border-slate-700 px-3 py-2 text-left">Top breakout?</button>
-          <button className="w-full rounded-lg border border-slate-700 px-3 py-2 text-left">Should I book profits?</button>
+          <button
+            onClick={() => navigate("/chat?query=What%20changed%20in%20my%20portfolio%20today%3F")}
+            className="w-full rounded-lg border border-slate-700 px-3 py-2 text-left"
+          >
+            What changed?
+          </button>
+          <button
+            onClick={() => navigate("/chat?query=Which%20stock%20has%20the%20top%20breakout%20signal%20today%3F")}
+            className="w-full rounded-lg border border-slate-700 px-3 py-2 text-left"
+          >
+            Top breakout?
+          </button>
+          <button
+            onClick={() => navigate("/chat?query=Should%20I%20book%20profits%20on%20my%20top%20winner%3F")}
+            className="w-full rounded-lg border border-slate-700 px-3 py-2 text-left"
+          >
+            Should I book profits?
+          </button>
         </div>
         <div className="mt-20 rounded-lg border border-slate-800 bg-slate-950/80 p-3 text-sm text-slate-400">Ask Nivesh AI...</div>
       </aside>

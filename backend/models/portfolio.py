@@ -47,3 +47,20 @@ class PortfolioAnalysisResponse(BaseModel):
     name: str
     holdings: list[HoldingItem]
     risk_band: Literal["low", "medium", "high"]
+
+
+class TradeExecuteRequest(BaseModel):
+    symbol: str
+    side: Literal["buy", "sell"] = "buy"
+    quantity: int = Field(ge=1, le=100000)
+    user_id: UUID
+
+
+class TradeExecuteResponse(BaseModel):
+    order_id: str
+    status: Literal["placed", "rejected"]
+    symbol: str
+    side: Literal["buy", "sell"]
+    quantity: int
+    estimated_price: float
+    message: str

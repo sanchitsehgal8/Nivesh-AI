@@ -1,4 +1,4 @@
-import { Link, Navigate, Route, Routes, useLocation } from "react-router-dom";
+import { Link, Navigate, Route, Routes, useLocation, useNavigate } from "react-router-dom";
 
 import ChartIntelligence from "./pages/ChartIntelligence";
 import ChatAssistant from "./pages/ChatAssistant";
@@ -20,6 +20,7 @@ const navItems = [
 
 function Sidebar() {
   const location = useLocation();
+  const navigate = useNavigate();
   return (
     <aside className="hidden w-56 shrink-0 border-r border-slate-800/70 bg-slate-950/80 p-3 md:block">
       <div className="mb-6 rounded-xl border border-slate-800 bg-slate-900/80 p-3">
@@ -45,7 +46,12 @@ function Sidebar() {
         })}
       </ul>
 
-      <button className="mt-6 w-full rounded-xl bg-indigo-400/90 px-3 py-2 text-sm font-semibold text-slate-950">+ New Analysis</button>
+      <button
+        onClick={() => navigate("/chat?query=Analyze%20my%20portfolio%20risk%20and%20top%20actions")}
+        className="mt-6 w-full rounded-xl bg-indigo-400/90 px-3 py-2 text-sm font-semibold text-slate-950"
+      >
+        + New Analysis
+      </button>
       <div className="mt-8 space-y-2 text-xs text-slate-400">
         <p>● Market Live</p>
         <p>⚙ Settings</p>

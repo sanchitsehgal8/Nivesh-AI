@@ -1,12 +1,16 @@
 import { useMemo, useState } from "react";
+import { useNavigate } from "react-router-dom";
 
+import { apiClient } from "../api/client";
 import { useSignals } from "../hooks/useSignals";
 
 export default function OpportunityRadar() {
+  const navigate = useNavigate();
   const { data = [] } = useSignals();
   const [riskFilter, setRiskFilter] = useState<"all" | "low" | "medium" | "high">("all");
   const [typeFilter, setTypeFilter] = useState<"all" | "insider_buy" | "bulk_deal" | "earnings_surprise" | "regulatory_change">("all");
   const [selected, setSelected] = useState(0);
+  const [tradeStatus, setTradeStatus] = useState<string>("");
 
   const filtered = useMemo(
     () =>
@@ -19,6 +23,21 @@ export default function OpportunityRadar() {
   );
 
   const focused = filtered[selected] ?? filtered[0];
+
+  const executeTrade = async () => {
+    if (!focused) return;
+    try {
+      const { data: order } = await apiClient.post<{ order_id: string; message: string }>("/trades/execute", {
+        symbol: focused.stock_symbol,
+        side: "buy",
+        quantity: 10,
+        user_id: "00000000-0000-0000-0000-000000000001",
+      });
+      setTradeStatus(`${order.message} (${order.order_id})`);
+    } catch {
+      setTradeStatus("Trade request failed. Please retry.");
+    }
+  };
 
   return (
     <main className="grid min-h-[calc(100vh-64px)] gap-4 p-4 xl:grid-cols-[1fr_290px]">
@@ -106,9 +125,17 @@ export default function OpportunityRadar() {
         </div>
 
         <div className="mt-6 grid grid-cols-2 gap-2">
-          <button className="rounded-lg bg-slate-700 px-3 py-2 text-sm">View Charts</button>
-          <button className="rounded-lg bg-emerald-500 px-3 py-2 text-sm font-semibold text-slate-950">Execute Trade</button>
+          <button
+            onClick={() => navigate(`/stock-explorer?symbol=${encodeURIComponent((focused?.stock_symbol ?? "RELIANCE").toUpperCase())}`)}
+            className="rounded-lg bg-slate-700 px-3 py-2 text-sm"
+          >
+            View Charts
+          </button>
+          <button onClick={executeTrade} className="rounded-lg bg-emerald-500 px-3 py-2 text-sm font-semibold text-slate-950">
+            Execute Trade
+          </button>
         </div>
+        {tradeStatus ? <p className="mt-3 text-xs text-emerald-300">{tradeStatus}</p> : null}
       </aside>
     </main>
   );

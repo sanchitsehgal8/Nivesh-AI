@@ -1,12 +1,20 @@
-import { useState } from "react";
+import { useEffect, useState } from "react";
+import { useSearchParams } from "react-router-dom";
 
 import { usePatterns } from "../hooks/usePatterns";
 import { useSignals } from "../hooks/useSignals";
 
 export default function StockExplorer() {
+  const [searchParams] = useSearchParams();
   const [symbol, setSymbol] = useState("INFY");
+  const [timeframe, setTimeframe] = useState<"1D" | "1W" | "1M" | "1Y" | "5Y">("1D");
   const { data: patterns = [] } = usePatterns(symbol);
   const { data: signals = [] } = useSignals();
+
+  useEffect(() => {
+    const paramSymbol = searchParams.get("symbol");
+    if (paramSymbol) setSymbol(paramSymbol.toUpperCase());
+  }, [searchParams]);
 
   const symbolSignals = signals.filter((s) => s.stock_symbol === symbol);
   const confidenceSeries = patterns.slice(0, 8).map((p) => Math.round(p.confidence * 100));
@@ -33,14 +41,18 @@ export default function StockExplorer() {
 
         <div className="rounded-xl border border-slate-800 bg-slate-950/70 p-3">
           <div className="mb-3 flex gap-2 text-xs">
-            <button className="rounded bg-slate-800 px-2 py-1">1D</button>
-            <button className="rounded bg-slate-800 px-2 py-1">1W</button>
-            <button className="rounded bg-slate-800 px-2 py-1">1M</button>
-            <button className="rounded bg-slate-800 px-2 py-1">1Y</button>
-            <button className="rounded bg-slate-800 px-2 py-1">5Y</button>
+            {(["1D", "1W", "1M", "1Y", "5Y"] as const).map((tf) => (
+              <button
+                key={tf}
+                onClick={() => setTimeframe(tf)}
+                className={`rounded px-2 py-1 ${timeframe === tf ? "bg-indigo-500/70" : "bg-slate-800"}`}
+              >
+                {tf}
+              </button>
+            ))}
           </div>
           <div className="h-[520px] rounded-lg border border-slate-800 bg-[linear-gradient(to_bottom,#0c1322,#070a12)] p-4">
-            <p className="mb-4 text-xs text-slate-500">Resistance 3,120.00</p>
+            <p className="mb-4 text-xs text-slate-500">{timeframe} view · Resistance 3,120.00</p>
             <div className="h-full w-full rounded bg-[radial-gradient(circle_at_50%_90%,#22c55e30,transparent_45%)]" />
           </div>
         </div>

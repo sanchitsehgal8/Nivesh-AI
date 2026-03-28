@@ -1,4 +1,5 @@
-import { FormEvent, useState } from "react";
+import { FormEvent, useEffect, useState } from "react";
+import { useSearchParams } from "react-router-dom";
 
 import { apiClient } from "../api/client";
 import { useAppStore } from "../store/useAppStore";
@@ -13,6 +14,7 @@ type ChatResponse = {
 };
 
 export default function ChatAssistant() {
+  const [searchParams] = useSearchParams();
   const [query, setQuery] = useState("Should I hold Infosys?");
   const [loading, setLoading] = useState(false);
   const { chatHistory, addChatMessage } = useAppStore((s) => ({
@@ -55,6 +57,13 @@ export default function ChatAssistant() {
       setLoading(false);
     }
   };
+
+  useEffect(() => {
+    const incoming = searchParams.get("query");
+    if (incoming) {
+      setQuery(incoming);
+    }
+  }, [searchParams]);
 
   return (
     <main className="grid min-h-[calc(100vh-64px)] gap-4 p-4 xl:grid-cols-[260px_1fr]">

@@ -5,6 +5,7 @@ import { usePatterns } from "../hooks/usePatterns";
 
 export default function ChartIntelligence() {
   const [symbol, setSymbol] = useState("INFY");
+  const [timeframe, setTimeframe] = useState<"15M" | "1H" | "4H" | "1D">("1D");
   const { data = [], isLoading } = usePatterns(symbol);
 
   return (
@@ -16,10 +17,15 @@ export default function ChartIntelligence() {
             <p className="text-sm text-slate-400">● Scanning 1,847 NSE stocks</p>
           </div>
           <div className="flex flex-wrap gap-2 text-xs">
-            <button className="rounded bg-slate-800 px-3 py-2">15M</button>
-            <button className="rounded bg-slate-800 px-3 py-2">1H</button>
-            <button className="rounded bg-slate-800 px-3 py-2">4H</button>
-            <button className="rounded bg-slate-800 px-3 py-2">1D</button>
+            {(["15M", "1H", "4H", "1D"] as const).map((tf) => (
+              <button
+                key={tf}
+                onClick={() => setTimeframe(tf)}
+                className={`rounded px-3 py-2 ${timeframe === tf ? "bg-indigo-500/70 text-white" : "bg-slate-800"}`}
+              >
+                {tf}
+              </button>
+            ))}
             <input
               value={symbol}
               onChange={(e) => setSymbol(e.target.value.toUpperCase())}
@@ -53,7 +59,7 @@ export default function ChartIntelligence() {
                     <td className="px-3 py-2">{(pattern.confidence * 100).toFixed(0)}% Match</td>
                     <td className="px-3 py-2">{(pattern.backtest_success_rate * 100).toFixed(1)}%</td>
                     <td className="px-3 py-2 text-emerald-400">+{(pattern.backtest_success_rate * 6.5).toFixed(1)}%</td>
-                    <td className="px-3 py-2">{pattern.timeframe}</td>
+                    <td className="px-3 py-2">{timeframe}</td>
                   </tr>
                 ))}
               </tbody>
