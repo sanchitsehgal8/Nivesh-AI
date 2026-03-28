@@ -19,6 +19,8 @@ class ChatResponse(BaseModel):
     reasoning: str
     citations: list[str]
     supporting_signals: list[str]
+    agent_route: Literal["portfolio", "pattern", "sector"] | None = None
+    agent_trace: list[str] = Field(default_factory=list)
 
 
 class VideoGenerateRequest(BaseModel):

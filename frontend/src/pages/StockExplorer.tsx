@@ -21,6 +21,11 @@ export default function StockExplorer() {
 
   const symbolSignals = signals.filter((s) => s.stock_symbol === symbol);
   const confidenceSeries = patterns.slice(0, 8).map((p) => Math.round(p.confidence * 100));
+  const latest = candles.length > 0 ? candles[candles.length - 1] : null;
+  const prev = candles.length > 1 ? candles[candles.length - 2] : null;
+  const ltp = latest?.close ?? 2984.45;
+  const delta = prev ? ltp - prev.close : 12.3;
+  const deltaPct = prev && prev.close > 0 ? (delta / prev.close) * 100 : 0.41;
 
   return (
     <main className="grid min-h-[calc(100vh-64px)] gap-4 p-4 xl:grid-cols-[1fr_330px]">
@@ -38,7 +43,12 @@ export default function StockExplorer() {
         <div>
           <h1 className="text-4xl font-black">{symbol}</h1>
           <p className="text-3xl font-bold">
-            ₹2,984.45 <span className="text-sm text-emerald-400">+12.30 (0.41%)</span>
+            ₹{ltp.toFixed(2)}{" "}
+            <span className={`text-sm ${delta >= 0 ? "text-emerald-400" : "text-rose-400"}`}>
+              {delta >= 0 ? "+" : ""}
+              {delta.toFixed(2)} ({delta >= 0 ? "+" : ""}
+              {deltaPct.toFixed(2)}%)
+            </span>
           </p>
         </div>
 

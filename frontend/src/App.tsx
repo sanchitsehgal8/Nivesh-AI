@@ -47,7 +47,11 @@ function Sidebar() {
       </ul>
 
       <button
-        onClick={() => navigate("/chat?query=Analyze%20my%20portfolio%20risk%20and%20top%20actions")}
+        onClick={() =>
+          navigate(
+            `/chat?query=${encodeURIComponent("Analyze my portfolio risk and top actions")}&run=${Date.now()}`,
+          )
+        }
         className="mt-6 w-full rounded-xl bg-indigo-400/90 px-3 py-2 text-sm font-semibold text-slate-950"
       >
         + New Analysis

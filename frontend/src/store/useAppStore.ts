@@ -28,6 +28,8 @@ export type ChatMessage = {
   content: string;
   citations?: string[];
   confidenceScore?: number;
+  agentRoute?: "portfolio" | "pattern" | "sector";
+  agentTrace?: string[];
 };
 
 export interface AppState {

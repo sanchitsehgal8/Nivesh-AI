@@ -1,4 +1,4 @@
-import { useEffect } from "react";
+import { useEffect, useState } from "react";
 import { useNavigate } from "react-router-dom";
 
 import { SignalCard } from "../components/SignalCard";
@@ -8,6 +8,7 @@ import { useAppStore } from "../store/useAppStore";
 
 export default function Dashboard() {
   const navigate = useNavigate();
+  const [copilotQuery, setCopilotQuery] = useState("");
   const { data, isLoading } = useSignals();
   const setSignals = useAppStore((s) => s.setSignals);
   const signals = data ?? [];
@@ -93,25 +94,57 @@ export default function Dashboard() {
         </div>
         <div className="mb-4 space-y-2 text-xs">
           <button
-            onClick={() => navigate("/chat?query=What%20changed%20in%20my%20portfolio%20today%3F")}
+            onClick={() =>
+              navigate(
+                `/chat?query=${encodeURIComponent("What changed in my portfolio today?")}&run=${Date.now()}`,
+              )
+            }
             className="w-full rounded-lg border border-slate-700 px-3 py-2 text-left"
           >
             What changed?
           </button>
           <button
-            onClick={() => navigate("/chat?query=Which%20stock%20has%20the%20top%20breakout%20signal%20today%3F")}
+            onClick={() =>
+              navigate(
+                `/chat?query=${encodeURIComponent("Which stock has the top breakout signal today?")}&run=${Date.now()}`,
+              )
+            }
             className="w-full rounded-lg border border-slate-700 px-3 py-2 text-left"
           >
             Top breakout?
           </button>
           <button
-            onClick={() => navigate("/chat?query=Should%20I%20book%20profits%20on%20my%20top%20winner%3F")}
+            onClick={() =>
+              navigate(
+                `/chat?query=${encodeURIComponent("Should I book profits on my top winner?")}&run=${Date.now()}`,
+              )
+            }
             className="w-full rounded-lg border border-slate-700 px-3 py-2 text-left"
           >
             Should I book profits?
           </button>
         </div>
-        <div className="mt-20 rounded-lg border border-slate-800 bg-slate-950/80 p-3 text-sm text-slate-400">Ask Nivesh AI...</div>
+        <div className="mt-20 space-y-2 rounded-lg border border-slate-800 bg-slate-950/80 p-3 text-sm text-slate-400">
+          <input
+            value={copilotQuery}
+            onChange={(e) => setCopilotQuery(e.target.value)}
+            onKeyDown={(e) => {
+              if (e.key === "Enter" && copilotQuery.trim()) {
+                navigate(`/chat?query=${encodeURIComponent(copilotQuery)}&run=${Date.now()}`);
+              }
+            }}
+            className="w-full rounded border border-slate-700 bg-slate-900 px-2 py-2 text-sm text-slate-100 outline-none focus:border-indigo-500"
+            placeholder="Ask Nivesh AI..."
+          />
+          <button
+            onClick={() =>
+              copilotQuery.trim() && navigate(`/chat?query=${encodeURIComponent(copilotQuery)}&run=${Date.now()}`)
+            }
+            className="w-full rounded bg-indigo-600 px-3 py-2 text-sm font-medium text-white hover:bg-indigo-500"
+          >
+            Ask Copilot
+          </button>
+        </div>
       </aside>
     </main>
   );

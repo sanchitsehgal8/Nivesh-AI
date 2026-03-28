@@ -19,6 +19,7 @@ class GraphState(TypedDict, total=False):
     portfolio_id: str | None
     symbol: str
     route: Literal["portfolio", "pattern", "sector"]
+    executed_agents: list[str]
     retriever: dict[str, object]
     technical: dict[str, object]
     fundamental: dict[str, object]
@@ -44,6 +45,7 @@ def _router(state: GraphState) -> GraphState:
     state["reasoning_parts"] = []
     state["citations"] = []
     state["supporting_signals"] = []
+    state["executed_agents"] = ["router"]
     state["confidence_base"] = 0.62
     state["risk_base"] = 0.45
 
@@ -86,6 +88,7 @@ def _accumulate(state: GraphState, payload: dict[str, object]) -> None:
 
 
 def _retriever_agent(state: GraphState) -> GraphState:
+    state.setdefault("executed_agents", []).append("retriever")
     payload = run_retriever_agent(state["query"], state.get("symbol"))
     state["retriever"] = payload
     _accumulate(state, payload)
@@ -93,6 +96,7 @@ def _retriever_agent(state: GraphState) -> GraphState:
 
 
 def _technical_agent(state: GraphState) -> GraphState:
+    state.setdefault("executed_agents", []).append("technical")
     payload = run_technical_agent(state.get("symbol", "INFY"))
     state["technical"] = payload
     _accumulate(state, payload)
@@ -100,6 +104,7 @@ def _technical_agent(state: GraphState) -> GraphState:
 
 
 def _fundamental_agent(state: GraphState) -> GraphState:
+    state.setdefault("executed_agents", []).append("fundamental")
     payload = run_fundamental_agent(state.get("symbol", "INFY"))
     state["fundamental"] = payload
     _accumulate(state, payload)
@@ -107,6 +112,7 @@ def _fundamental_agent(state: GraphState) -> GraphState:
 
 
 def _sentiment_agent(state: GraphState) -> GraphState:
+    state.setdefault("executed_agents", []).append("sentiment")
     payload = run_sentiment_agent(state["query"])
     state["sentiment"] = payload
     _accumulate(state, payload)
@@ -114,6 +120,7 @@ def _sentiment_agent(state: GraphState) -> GraphState:
 
 
 def _macro_agent(state: GraphState) -> GraphState:
+    state.setdefault("executed_agents", []).append("macro")
     payload = run_macro_agent()
     state["macro"] = payload
     _accumulate(state, payload)
@@ -121,6 +128,7 @@ def _macro_agent(state: GraphState) -> GraphState:
 
 
 def _portfolio_risk_agent(state: GraphState) -> GraphState:
+    state.setdefault("executed_agents", []).append("portfolio_risk")
     payload = run_portfolio_risk_agent(state.get("portfolio_id"), holdings_count=4, max_weight=0.36)
     state["portfolio_risk"] = payload
     _accumulate(state, payload)
@@ -128,6 +136,8 @@ def _portfolio_risk_agent(state: GraphState) -> GraphState:
 
 
 def _synthesis_agent(state: GraphState) -> GraphState:
+    state.setdefault("executed_agents", []).append("synthesis")
+    state.setdefault("executed_agents", []).append("langchain_pipeline")
     output = run_synthesis_agent(
         {
             "reasoning_parts": state.get("reasoning_parts", []),
@@ -144,6 +154,8 @@ def _synthesis_agent(state: GraphState) -> GraphState:
     state["reasoning"] = output["reasoning"]
     state["citations"] = output["citations"]
     state["supporting_signals"] = output["supporting_signals"]
+    if output.get("llm_provider") == "huggingface":
+        state.setdefault("executed_agents", []).append("langchain_huggingface")
     return state
 
 
@@ -215,4 +227,6 @@ async def run_investment_graph(query: str, user_id: str, portfolio_id: str | Non
         "reasoning": output.get("reasoning", "Insufficient data"),
         "citations": output.get("citations", []),
         "supporting_signals": output.get("supporting_signals", []),
+        "agent_route": output.get("route"),
+        "agent_trace": output.get("executed_agents", []),
     }

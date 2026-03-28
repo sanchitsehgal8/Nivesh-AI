@@ -9,6 +9,8 @@ type VideoResponse = {
   duration_seconds: number;
 };
 
+const DEMO_VIDEO_URL = "https://storage.googleapis.com/gtv-videos-bucket/sample/ForBiggerEscapes.mp4";
+
 export default function VideoBriefings() {
   const [video, setVideo] = useState<VideoResponse | null>(null);
   const [loading, setLoading] = useState(false);
@@ -24,7 +26,7 @@ export default function VideoBriefings() {
         setVideo(data);
       } catch {
         setVideo({
-          video_url: "https://example.com/videos/daily-briefing.mp4",
+          video_url: DEMO_VIDEO_URL,
           script:
             "Fallback video script generated locally. Market breadth is mixed, focus on high-conviction breakouts with strict risk controls.",
           duration_seconds: 60,
@@ -54,7 +56,7 @@ export default function VideoBriefings() {
 
         <div className="overflow-hidden rounded-2xl border border-slate-800 bg-slate-950/70">
           <div className="aspect-video bg-[radial-gradient(circle_at_top,#374151,#020617)] p-4">
-            <VideoPlayer src={video?.video_url ?? "https://example.com/videos/daily-briefing.mp4"} />
+            <VideoPlayer src={video?.video_url ?? DEMO_VIDEO_URL} />
           </div>
           <div className="border-t border-slate-800 p-4">
             <p className="text-3xl font-bold">Daily Market Wrap — March 27, 2025</p>

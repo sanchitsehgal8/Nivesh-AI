@@ -67,6 +67,8 @@ export function TradingViewChart({ candles, support, resistance, className }: Pr
       },
       timeScale: {
         borderColor: "#334155",
+        timeVisible: true,
+        secondsVisible: false,
       },
       crosshair: {
         vertLine: { color: "#64748b" },
@@ -81,6 +83,8 @@ export function TradingViewChart({ candles, support, resistance, className }: Pr
       borderVisible: false,
       wickUpColor: "#22c55e",
       wickDownColor: "#f43f5e",
+      lastValueVisible: true,
+      priceLineVisible: true,
     });
     candleSeries.setData(candleData);
 
