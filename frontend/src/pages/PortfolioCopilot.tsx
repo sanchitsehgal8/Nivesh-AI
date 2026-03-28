@@ -1,4 +1,5 @@
 import { PortfolioRiskMeter } from "../components/PortfolioRiskMeter";
+import { PerformanceChart } from "../components/charts/PerformanceChart";
 import { usePortfolio } from "../hooks/usePortfolio";
 
 const SAMPLE_PORTFOLIO_ID = "00000000-0000-0000-0000-000000000001";
@@ -13,6 +14,7 @@ export default function PortfolioCopilot() {
   const holdings = data?.holdings ?? [];
   const riskBand = data?.risk_band ?? "medium";
   const totalPnl = holdings.reduce((sum, h) => sum + h.quantity * (Math.random() * 120 - 30), 0);
+  const perfSeries = Array.from({ length: 40 }).map((_, i) => 100 + Math.sin(i / 4) * 8 + i * 0.35);
 
   return (
     <main className="grid min-h-[calc(100vh-64px)] gap-4 p-4 xl:grid-cols-[1fr_320px]">
@@ -66,7 +68,9 @@ export default function PortfolioCopilot() {
 
         <section className="rounded-xl border border-slate-800 bg-slate-900/60 p-4">
           <h3 className="mb-2 text-lg font-semibold">Performance Intelligence</h3>
-          <div className="h-44 rounded-lg bg-[radial-gradient(circle_at_40%_40%,#818cf840,transparent_45%)]" />
+          <div className="h-44 rounded-lg overflow-hidden">
+            <PerformanceChart values={perfSeries} />
+          </div>
           <p className="mt-2 text-sm text-slate-400">Net P&amp;L estimate: <span className={`${totalPnl >= 0 ? "text-emerald-400" : "text-rose-400"}`}>{totalPnl >= 0 ? "+" : ""}₹{Math.abs(totalPnl).toFixed(0)}</span></p>
         </section>
       </section>

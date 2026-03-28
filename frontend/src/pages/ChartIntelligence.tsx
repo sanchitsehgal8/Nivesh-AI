@@ -1,12 +1,15 @@
 import { useState } from "react";
 
 import { PatternOverlay } from "../components/PatternOverlay";
+import { TradingViewChart } from "../components/charts/TradingViewChart";
+import { useOhlcv } from "../hooks/useOhlcv";
 import { usePatterns } from "../hooks/usePatterns";
 
 export default function ChartIntelligence() {
   const [symbol, setSymbol] = useState("INFY");
   const [timeframe, setTimeframe] = useState<"15M" | "1H" | "4H" | "1D">("1D");
   const { data = [], isLoading } = usePatterns(symbol);
+  const { data: candles = [] } = useOhlcv(symbol, timeframe);
 
   return (
     <main className="space-y-4 p-4">
@@ -71,8 +74,8 @@ export default function ChartIntelligence() {
       <section className="grid gap-4 xl:grid-cols-[1.25fr_0.75fr]">
         <div className="rounded-xl border border-slate-800 bg-slate-900/40 p-4">
           <h2 className="mb-2 text-2xl font-bold">RELIANCE <span className="text-xs text-emerald-400">BULLISH FLAG</span></h2>
-          <div className="h-72 rounded-lg bg-[linear-gradient(to_bottom,#0b1220,#05080f)] p-4">
-            <div className="h-full w-full rounded border border-emerald-500/20 bg-[radial-gradient(circle_at_30%_40%,#14532d33,transparent_45%)]" />
+          <div className="h-72 rounded-lg border border-slate-800 bg-[linear-gradient(to_bottom,#0b1220,#05080f)] p-3">
+            <TradingViewChart candles={candles} support={2840} resistance={2980} />
           </div>
         </div>
         <div className="rounded-xl border border-slate-800 bg-slate-900/40 p-4">

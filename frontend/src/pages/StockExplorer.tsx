@@ -2,7 +2,9 @@ import { useEffect, useState } from "react";
 import { useSearchParams } from "react-router-dom";
 
 import { usePatterns } from "../hooks/usePatterns";
+import { useOhlcv } from "../hooks/useOhlcv";
 import { useSignals } from "../hooks/useSignals";
+import { TradingViewChart } from "../components/charts/TradingViewChart";
 
 export default function StockExplorer() {
   const [searchParams] = useSearchParams();
@@ -10,6 +12,7 @@ export default function StockExplorer() {
   const [timeframe, setTimeframe] = useState<"1D" | "1W" | "1M" | "1Y" | "5Y">("1D");
   const { data: patterns = [] } = usePatterns(symbol);
   const { data: signals = [] } = useSignals();
+  const { data: candles = [] } = useOhlcv(symbol, timeframe);
 
   useEffect(() => {
     const paramSymbol = searchParams.get("symbol");
@@ -53,7 +56,9 @@ export default function StockExplorer() {
           </div>
           <div className="h-[520px] rounded-lg border border-slate-800 bg-[linear-gradient(to_bottom,#0c1322,#070a12)] p-4">
             <p className="mb-4 text-xs text-slate-500">{timeframe} view · Resistance 3,120.00</p>
-            <div className="h-full w-full rounded bg-[radial-gradient(circle_at_50%_90%,#22c55e30,transparent_45%)]" />
+            <div className="h-full w-full">
+              <TradingViewChart candles={candles} support={2845} resistance={3120} />
+            </div>
           </div>
         </div>
 

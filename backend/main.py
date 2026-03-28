@@ -6,6 +6,7 @@ from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
 
 from backend.routes.chat import router as chat_router
+from backend.routes.market import router as market_router
 from backend.routes.patterns import router as patterns_router
 from backend.routes.portfolio import router as portfolio_router
 from backend.routes.signals import router as signals_router
@@ -26,6 +27,7 @@ app.add_middleware(
 
 app.include_router(signals_router)
 app.include_router(patterns_router)
+app.include_router(market_router)
 app.include_router(chat_router)
 app.include_router(portfolio_router)
 app.include_router(video_router)

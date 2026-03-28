@@ -81,6 +81,7 @@ You can trigger tasks from a Python shell once worker is up.
 
 - Call [backend/routes/signals.py](backend/routes/signals.py) via `GET /signals/latest`
 - Call [backend/routes/patterns.py](backend/routes/patterns.py) via `GET /patterns/INFY`
+- Call [backend/routes/market.py](backend/routes/market.py) via `GET /market/ohlcv/INFY?interval=1d&period=6mo`
 - Use [frontend/src/pages/ChatAssistant.tsx](frontend/src/pages/ChatAssistant.tsx) to test `POST /chat`
 
 ## Troubleshooting
