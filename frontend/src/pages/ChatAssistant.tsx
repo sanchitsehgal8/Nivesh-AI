@@ -57,44 +57,63 @@ export default function ChatAssistant() {
   };
 
   return (
-    <main className="mx-auto max-w-4xl space-y-4 p-6 text-slate-100">
-      <h1 className="text-2xl font-semibold">Portfolio-Aware Chat Assistant</h1>
-      <section className="space-y-3 rounded-xl border border-slate-700 bg-slate-900 p-4">
-        {chatHistory.map((msg, index) => (
-          <div key={`${msg.role}-${index}`} className="rounded-lg border border-slate-700 p-3">
-            <p className="text-xs uppercase text-slate-400">{msg.role}</p>
-            <p className="text-sm text-slate-200">{msg.content}</p>
-            {typeof msg.confidenceScore === "number" && (
-              <p className="mt-1 text-xs text-cyan-300">Confidence: {(msg.confidenceScore * 100).toFixed(0)}%</p>
-            )}
-            {msg.citations && msg.citations.length > 0 && (
-              <details className="mt-2 text-xs text-slate-300">
-                <summary>Sources</summary>
-                <ul className="mt-1 list-disc pl-5">
-                  {msg.citations.map((citation) => (
-                    <li key={citation}>{citation}</li>
-                  ))}
-                </ul>
-              </details>
-            )}
+    <main className="grid min-h-[calc(100vh-64px)] gap-4 p-4 xl:grid-cols-[260px_1fr]">
+      <aside className="space-y-3 rounded-xl border border-slate-800 bg-slate-900/60 p-4 text-sm">
+        <h3 className="text-xs uppercase tracking-widest text-slate-400">Context Engine</h3>
+        <div className="rounded-lg border border-slate-700 bg-slate-950/70 p-3 text-slate-300">
+          Active portfolio context on. Analyzing holdings, risk, and strategy.
+        </div>
+        <h3 className="pt-2 text-xs uppercase tracking-widest text-slate-400">Recent Signals</h3>
+        <p className="rounded bg-slate-800 px-2 py-1 text-xs">RELIANCE: Bullish</p>
+        <p className="rounded bg-slate-800 px-2 py-1 text-xs">INFY: Sector Lag</p>
+        <p className="rounded bg-slate-800 px-2 py-1 text-xs">HDFC: Dividend Alert</p>
+      </aside>
+
+      <section className="space-y-4 rounded-xl border border-slate-800 bg-slate-900/30 p-4">
+        <div className="flex justify-end">
+          <div className="max-w-2xl rounded-xl bg-indigo-600 px-4 py-3 text-sm text-indigo-50">
+            Should I increase exposure to IT stocks given the current NIFTY outlook?
           </div>
-        ))}
+        </div>
+
+        <section className="space-y-3 rounded-xl border border-slate-700 bg-slate-900 p-4">
+          {chatHistory.map((msg, index) => (
+            <div key={`${msg.role}-${index}`} className="rounded-lg border border-slate-700 p-3">
+              <p className="text-xs uppercase text-slate-400">{msg.role}</p>
+              <p className="text-sm text-slate-200">{msg.content}</p>
+              {typeof msg.confidenceScore === "number" && (
+                <p className="mt-1 text-xs text-amber-300">{Math.round(msg.confidenceScore * 100)}% Confidence</p>
+              )}
+              {msg.citations && msg.citations.length > 0 && (
+                <details className="mt-2 text-xs text-slate-300">
+                  <summary>Sources</summary>
+                  <ul className="mt-1 list-disc pl-5">
+                    {msg.citations.map((citation) => (
+                      <li key={citation}>{citation}</li>
+                    ))}
+                  </ul>
+                </details>
+              )}
+            </div>
+          ))}
+        </section>
+
+        <form onSubmit={handleSubmit} className="flex gap-3 rounded-xl border border-slate-800 bg-slate-950/80 p-3">
+          <input
+            value={query}
+            onChange={(e) => setQuery(e.target.value)}
+            className="flex-1 bg-transparent px-2 text-sm outline-none"
+            placeholder="Ask Nivesh AI about any stock or portfolio risk..."
+          />
+          <button
+            type="submit"
+            disabled={loading}
+            className="rounded bg-indigo-500 px-4 py-2 font-medium disabled:opacity-50"
+          >
+            {loading ? "Thinking..." : "➤"}
+          </button>
+        </form>
       </section>
-      <form onSubmit={handleSubmit} className="flex gap-3">
-        <input
-          value={query}
-          onChange={(e) => setQuery(e.target.value)}
-          className="flex-1 rounded bg-slate-800 px-3 py-2"
-          placeholder="Ask about your portfolio or a stock..."
-        />
-        <button
-          type="submit"
-          disabled={loading}
-          className="rounded bg-cyan-600 px-4 py-2 font-medium disabled:opacity-50"
-        >
-          {loading ? "Thinking..." : "Ask"}
-        </button>
-      </form>
     </main>
   );
 }

@@ -23,9 +23,13 @@
 
 	`uvicorn backend.main:app --reload --port 8001`
 
+	Or use helper script:
+
+	`bash scripts/dev_backend.sh 8001`
+
 5. Verify health:
 
-	`http://localhost:8000/health`
+	`http://localhost:8001/health`
 
 ### 2) Frontend app (React + Vite)
 
@@ -42,6 +46,10 @@
 3. Run frontend:
 
 	`npm run dev`
+
+	Or use helper script from repo root:
+
+	`bash scripts/dev_frontend.sh`
 
 4. Open:
 
@@ -88,6 +96,14 @@ You can trigger tasks from a Python shell once worker is up.
 	`npm run dev`
 
 	(not `npm runm dev`)
+
+- If backend exits immediately, check port conflict first and then retry:
+
+	`lsof -nP -iTCP:8001 -sTCP:LISTEN`
+
+	`kill <PID>`
+
+	`bash scripts/dev_backend.sh 8001`
 
 - If backend infra variables are missing, the app serves fallback sample data so UI pages remain functional.
 

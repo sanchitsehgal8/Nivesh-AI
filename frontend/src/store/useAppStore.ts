@@ -20,6 +20,7 @@ export type Portfolio = {
   id: string;
   name: string;
   holdings: Holding[];
+  risk_band?: "low" | "medium" | "high";
 };
 
 export type ChatMessage = {

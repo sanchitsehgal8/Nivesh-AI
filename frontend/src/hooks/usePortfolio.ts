@@ -16,6 +16,7 @@ export function usePortfolio(portfolioId: string) {
         return {
           id: portfolioId,
           name: "Sample Portfolio",
+          risk_band: "medium",
           holdings: [
             { symbol: "INFY", quantity: 40, avg_buy_price: 1540 },
             { symbol: "RELIANCE", quantity: 20, avg_buy_price: 2850 },
