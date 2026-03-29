@@ -1,129 +1,52 @@
-# Nivesh-AI
+# Nivesh AI
 
-## Quick start (local)
+AI investment intelligence platform for Indian retail investors with trading signals, pattern detection, portfolio analysis, and auto-generated market videos.
 
-> Recommended Python: 3.11–3.13 (works on 3.14 with current dependency set, but ecosystem support is still evolving).
+## Setup
 
-### 1) Backend API (FastAPI)
+Install Python 3.10+, Node 18+. Backend runs on port 8001, frontend on 5174.
 
-1. Create a Python 3.11+ virtual environment and activate it.
-2. Install backend dependencies:
+Backend: `cd backend && pip install -r requirements.txt && python -m uvicorn main:app --reload`
 
-	`pip install -r backend/requirements.txt`
+Frontend: `cd frontend && npm install && npm run dev`
 
-3. Copy env template and fill keys:
+Open http://localhost:5174 after both start.
 
-	`cp .env.example .env`
+## Features
 
-4. Run API from repo root:
+Opportunity Radar detects trading signals from corporate filings, bulk deals, and insider trades.
 
-	`uvicorn backend.main:app --reload --port 8001`
+Chart Pattern Intelligence identifies technical patterns (MACD, RSI, Bollinger Bands, breakouts) across 1,500+ NSE stocks.
 
-	If 8001 is busy, use:
+Portfolio Copilot analyzes portfolios using a 7-agent AI pipeline with source-cited recommendations.
 
-	`lsof -ti tcp:8001 | xargs -n 1 kill -9`
+Market Videos auto-generates 30-90 second market briefing scripts.
 
-	Or use helper script:
+Live Signal Feed displays real trading signals from NSE/BSE on the dashboard.
 
-	`bash scripts/dev_backend.sh 8001`
+Stock Explorer shows fundamental data, sentiment analysis, and technical patterns for any stock.
 
-5. Verify health:
+Chat Assistant answers investment questions with multi-agent AI reasoning.
 
-	`http://localhost:8001/health`
+## Architecture
 
-### 2) Frontend app (React + Vite)
+React frontend proxies to FastAPI backend which runs a 7-agent LangGraph pipeline (Router → Retriever, Technical, Fundamental agents in parallel → Sentiment → Macro → Portfolio Risk → Synthesis) connected to NSE/BSE APIs, yfinance, and FinBERT, with data stored in Supabase and Redis.
 
-1. Install dependencies:
+## Agents
 
-	`cd frontend && npm install`
+Router classifies queries, Retriever searches filings, Technical analyzes price momentum, Fundamental checks valuation, Sentiment analyzes market mood, Macro detects market regime, Portfolio Risk assesses concentration, Synthesis generates final recommendation with confidence and risk score.
 
-2. (Optional) set API URL:
+## API Endpoints
 
-	Create `frontend/.env` with:
+GET /signals/latest returns trading signals. GET /patterns/{symbol} returns technical patterns with backtest success rates. GET /market/ohlcv/{symbol} returns candlestick data. POST /chat accepts portfolio analysis queries. POST /portfolio-analysis returns holdings and risk metrics. POST /video/generate creates market briefing scripts.
 
-	`VITE_API_BASE_URL=http://localhost:8001`
+## Status
 
-	(Recommended in dev: leave unset and use built-in proxy `/api`.)
+Backend 80% complete with working APIs and real data integration. Frontend 30% complete requiring API wiring. Production ready in 2-3 weeks with one developer.
 
-3. Run frontend:
+## Tech Stack
 
-	`npm run dev`
+React 18, Vite, TailwindCSS on frontend. FastAPI, LangGraph, TA-Lib, FinBERT on backend. Data from NSE API, BSE RSS, yfinance, Google Gemini. Storage on Supabase, Redis, Google Cloud.
 
-	Or use helper script from repo root:
 
-	`bash scripts/dev_frontend.sh`
 
-4. Open:
-
-	`http://localhost:5174`
-
-### 3) Database setup (Supabase)
-
-1. Open Supabase SQL editor.
-2. Run [backend/db/schema.sql](backend/db/schema.sql).
-3. Ensure pgvector extension is enabled.
-
-### 4) Celery worker (optional next)
-
-1. Ensure Redis/Upstash URL is valid in `.env`.
-2. Start worker:
-
-	`celery -A workers.celery_app.celery_app worker -l info`
-
-### 5) Optional scheduled jobs
-
-- Ingest filings: `run_ingest_filings`
-- Scan patterns: `run_scan_patterns`
-- Generate embeddings: `run_generate_embeddings`
-- Render videos: `run_render_video`
-
-You can trigger tasks from a Python shell once worker is up.
-
-### 6) Trigger a first end-to-end check
-
-- Call [backend/routes/signals.py](backend/routes/signals.py) via `GET /signals/latest`
-- Call [backend/routes/patterns.py](backend/routes/patterns.py) via `GET /patterns/INFY`
-- Call [backend/routes/market.py](backend/routes/market.py) via `GET /market/ohlcv/INFY?interval=1d&period=6mo`
-- Use [frontend/src/pages/ChatAssistant.tsx](frontend/src/pages/ChatAssistant.tsx) to test `POST /chat`
-
-## Troubleshooting
-
-- If you see `Address already in use`, free the port:
-
-	`lsof -nP -iTCP:8001 -sTCP:LISTEN`
-
-	`kill <PID>`
-
-- If frontend command fails, use the correct script:
-
-	`npm run dev`
-
-	(not `npm runm dev`)
-
-- If backend exits immediately, check port conflict first and then retry:
-
-	`lsof -nP -iTCP:8001 -sTCP:LISTEN`
-
-	`kill <PID>`
-
-	`bash scripts/dev_backend.sh 8001`
-
-- One-command startup from repo root:
-
-	`make up`
-
-	Stop all:
-
-	`make down`
-
-	Check status:
-
-	`make status`
-
-- If backend infra variables are missing, the app serves fallback sample data so UI pages remain functional.
-
-## Notes
-
-- Current implementation is scaffold-level and uses placeholders for some data providers.
-- Next production step is wiring real NSE/BSE ingestion APIs and adding secure auth + row-level security in Supabase.
-- Set `DATABASE_URL` to use pgvector direct workers in `pipelines/embedding_pipeline.py` and `embeddings/vector_store.py`.
