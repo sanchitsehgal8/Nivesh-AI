@@ -7,4 +7,4 @@ cd "$ROOT_DIR/frontend"
 if [[ ! -d node_modules ]]; then
   npm install
 fi
-exec npm run dev
+exec npm run dev -- --host 127.0.0.1 --port 5174 --strictPort

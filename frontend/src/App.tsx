@@ -1,5 +1,4 @@
 import { Link, Navigate, Route, Routes, useLocation, useNavigate } from "react-router-dom";
-
 import ChartIntelligence from "./pages/ChartIntelligence";
 import ChatAssistant from "./pages/ChatAssistant";
 import Dashboard from "./pages/Dashboard";

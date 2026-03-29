@@ -17,11 +17,11 @@
 
 4. Run API from repo root:
 
-	`uvicorn backend.main:app --reload --port 8000`
-
-	If 8000 is busy, use:
-
 	`uvicorn backend.main:app --reload --port 8001`
+
+	If 8001 is busy, use:
+
+	`lsof -ti tcp:8001 | xargs -n 1 kill -9`
 
 	Or use helper script:
 
@@ -43,6 +43,8 @@
 
 	`VITE_API_BASE_URL=http://localhost:8001`
 
+	(Recommended in dev: leave unset and use built-in proxy `/api`.)
+
 3. Run frontend:
 
 	`npm run dev`
@@ -53,7 +55,7 @@
 
 4. Open:
 
-	`http://localhost:5173`
+	`http://localhost:5174`
 
 ### 3) Database setup (Supabase)
 
@@ -105,6 +107,18 @@ You can trigger tasks from a Python shell once worker is up.
 	`kill <PID>`
 
 	`bash scripts/dev_backend.sh 8001`
+
+- One-command startup from repo root:
+
+	`make up`
+
+	Stop all:
+
+	`make down`
+
+	Check status:
+
+	`make status`
 
 - If backend infra variables are missing, the app serves fallback sample data so UI pages remain functional.
 

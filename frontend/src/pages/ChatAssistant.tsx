@@ -2,7 +2,6 @@ import { FormEvent, useEffect, useRef, useState } from "react";
 import { useLocation, useSearchParams } from "react-router-dom";
 
 import { apiClient } from "../api/client";
-import { useAppStore } from "../store/useAppStore";
 
 type ChatResponse = {
   recommendation: string;
@@ -15,6 +14,15 @@ type ChatResponse = {
   agent_trace?: string[];
 };
 
+type LocalMessage = {
+  role: "user" | "assistant";
+  content: string;
+  citations?: string[];
+  confidenceScore?: number;
+  agentRoute?: "portfolio" | "pattern" | "sector";
+  agentTrace?: string[];
+};
+
 export default function ChatAssistant() {
   const [searchParams] = useSearchParams();
   const location = useLocation();
@@ -23,15 +31,24 @@ export default function ChatAssistant() {
   const [error, setError] = useState<string | null>(null);
   const [backendOnline, setBackendOnline] = useState<boolean | null>(null);
   const autoSubmittedRef = useRef<string | null>(null);
-  const { chatHistory, addChatMessage } = useAppStore((s) => ({
-    chatHistory: s.chatHistory,
-    addChatMessage: s.addChatMessage,
-  }));
+  const [messages, setMessages] = useState<LocalMessage[]>([
+    {
+      role: "assistant",
+      content:
+        "Hi, I am your Nivesh AI copilot. Ask about hold/sell decisions, breakout candidates, or portfolio risk concentration.",
+      citations: ["Signal engine", "Portfolio context"],
+      confidenceScore: 0.82,
+    },
+  ]);
+
+  const pushMessage = (message: LocalMessage) => {
+    setMessages((prev) => [...prev, message]);
+  };
 
   const sendMessage = async (text: string) => {
     if (!text.trim()) return;
     setError(null);
-    addChatMessage({ role: "user", content: text });
+    pushMessage({ role: "user", content: text });
     setLoading(true);
     try {
       let data: ChatResponse;
@@ -55,13 +72,13 @@ export default function ChatAssistant() {
           agent_trace: ["router", "retriever", "technical", "fundamental", "sentiment", "synthesis"],
         };
       }
-      addChatMessage({
+      pushMessage({
         role: "assistant",
         content: `${data.recommendation} (${data.risk_band} risk): ${data.reasoning}`,
-        citations: data.citations,
+        citations: Array.isArray(data.citations) ? data.citations : [],
         confidenceScore: data.confidence_score,
         agentRoute: data.agent_route,
-        agentTrace: data.agent_trace,
+        agentTrace: Array.isArray(data.agent_trace) ? data.agent_trace : [],
       });
     } finally {
       setLoading(false);
@@ -87,18 +104,6 @@ export default function ChatAssistant() {
   }, [location.key, searchParams]);
 
   useEffect(() => {
-    if (chatHistory.length === 0) {
-      addChatMessage({
-        role: "assistant",
-        content:
-          "Hi, I am your Nivesh AI copilot. Ask about hold/sell decisions, breakout candidates, or portfolio risk concentration.",
-        citations: ["Signal engine", "Portfolio context"],
-        confidenceScore: 0.82,
-      });
-    }
-  }, [addChatMessage, chatHistory.length]);
-
-  useEffect(() => {
     let cancelled = false;
     const checkHealth = async () => {
       try {
@@ -113,8 +118,6 @@ export default function ChatAssistant() {
       cancelled = true;
     };
   }, []);
-
-  const safeHistory = Array.isArray(chatHistory) ? chatHistory : [];
 
   return (
     <main className="grid min-h-[calc(100vh-64px)] gap-4 p-4 xl:grid-cols-[260px_1fr]">
@@ -173,12 +176,12 @@ export default function ChatAssistant() {
         </div>
 
         <section className="space-y-3 rounded-xl border border-slate-700 bg-slate-900 p-4">
-          {safeHistory.length === 0 ? (
+          {messages.length === 0 ? (
             <div className="rounded-lg border border-slate-700 bg-slate-950/70 p-4 text-sm text-slate-300">
               Start by asking a stock question or click “Run Agentic Analysis”.
             </div>
           ) : null}
-          {safeHistory.map((msg, index) => (
+          {messages.map((msg, index) => (
             <div key={`${msg.role}-${index}`} className="rounded-lg border border-slate-700 p-3">
               <p className="text-xs uppercase text-slate-400">{msg.role}</p>
               <p className="text-sm text-slate-200">{msg.content}</p>
