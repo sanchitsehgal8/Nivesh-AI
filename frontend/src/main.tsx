@@ -5,6 +5,7 @@ import { BrowserRouter } from "react-router-dom";
 
 import App from "./App";
 import { queryClient } from "./api/client";
+import "./globals.css";
 import "./index.css";
 
 ReactDOM.createRoot(document.getElementById("root") as HTMLElement).render(
