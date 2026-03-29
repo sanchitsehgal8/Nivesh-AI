@@ -1,20 +1,21 @@
 import { PortfolioRiskMeter } from "../components/PortfolioRiskMeter";
 import { PerformanceChart } from "../components/charts/PerformanceChart";
 import { usePortfolio } from "../hooks/usePortfolio";
+import { usePortfolioPerformance } from "../hooks/usePortfolioPerformance";
 
 const SAMPLE_PORTFOLIO_ID = "00000000-0000-0000-0000-000000000001";
 
 export default function PortfolioCopilot() {
   const { data, isLoading } = usePortfolio(SAMPLE_PORTFOLIO_ID);
+  const holdings = data?.holdings ?? [];
+  const { perfSeries, latestPriceBySymbol, totalValue, totalPnl, todayPnl, dataSource, isLoading: perfLoading } =
+    usePortfolioPerformance(holdings);
 
   if (isLoading) {
     return <main className="p-6 text-slate-300">Loading portfolio analysis...</main>;
   }
 
-  const holdings = data?.holdings ?? [];
   const riskBand = data?.risk_band ?? "medium";
-  const totalPnl = holdings.reduce((sum, h) => sum + h.quantity * (Math.random() * 120 - 30), 0);
-  const perfSeries = Array.from({ length: 40 }).map((_, i) => 100 + Math.sin(i / 4) * 8 + i * 0.35);
 
   return (
     <main className="grid min-h-[calc(100vh-64px)] gap-4 p-4 xl:grid-cols-[1fr_320px]">
@@ -22,15 +23,17 @@ export default function PortfolioCopilot() {
         <div className="grid gap-3 md:grid-cols-3">
           <div className="rounded-lg bg-slate-900/70 p-3">
             <p className="text-xs text-slate-500">Total Value</p>
-            <p className="text-3xl font-black">₹14,82,340</p>
+            <p className="text-3xl font-black">₹{Math.round(totalValue).toLocaleString("en-IN")}</p>
           </div>
           <div className="rounded-lg bg-slate-900/70 p-3">
             <p className="text-xs text-slate-500">Today P&amp;L</p>
-            <p className="text-3xl font-black text-emerald-400">+₹23,410</p>
+            <p className={`text-3xl font-black ${todayPnl >= 0 ? "text-emerald-400" : "text-rose-400"}`}>
+              {todayPnl >= 0 ? "+" : "-"}₹{Math.round(Math.abs(todayPnl)).toLocaleString("en-IN")}
+            </p>
           </div>
           <div className="rounded-lg bg-slate-900/70 p-3">
             <p className="text-xs text-slate-500">Alpha Score</p>
-            <p className="text-3xl font-black">18.4%</p>
+            <p className="text-3xl font-black">{((perfSeries[perfSeries.length - 1] ?? 100) - 100).toFixed(1)}%</p>
           </div>
         </div>
 
@@ -49,12 +52,13 @@ export default function PortfolioCopilot() {
             </thead>
             <tbody>
               {holdings.map((h, i) => {
-                const pnl = Math.round(h.quantity * (Math.random() * 120 - 30));
+                const ltp = latestPriceBySymbol[h.symbol.toUpperCase()] ?? h.avg_buy_price;
+                const pnl = Math.round(h.quantity * (ltp - h.avg_buy_price));
                 return (
                   <tr key={h.symbol} className="border-t border-slate-800">
                     <td className="px-3 py-2 font-semibold">{h.symbol}</td>
                     <td className="px-3 py-2">{h.quantity}</td>
-                    <td className="px-3 py-2">₹{(h.avg_buy_price + 58).toFixed(2)}</td>
+                    <td className="px-3 py-2">₹{ltp.toFixed(2)}</td>
                     <td className={`px-3 py-2 font-semibold ${pnl >= 0 ? "text-emerald-400" : "text-rose-400"}`}>
                       {pnl >= 0 ? "+" : ""}₹{Math.abs(pnl).toLocaleString("en-IN")}
                     </td>
@@ -67,11 +71,19 @@ export default function PortfolioCopilot() {
         </section>
 
         <section className="rounded-xl border border-slate-800 bg-slate-900/60 p-4">
-          <h3 className="mb-2 text-lg font-semibold">Performance Intelligence</h3>
+          <div className="mb-2 flex items-center justify-between">
+            <h3 className="text-lg font-semibold">Performance Intelligence</h3>
+            <span className={`rounded px-2 py-1 text-xs ${dataSource === "live" ? "bg-emerald-500/20 text-emerald-300" : "bg-amber-500/20 text-amber-300"}`}>
+              {dataSource === "live" ? "Live market data" : "Fallback sample data"}
+            </span>
+          </div>
           <div className="h-44 rounded-lg overflow-hidden">
             <PerformanceChart values={perfSeries} />
           </div>
-          <p className="mt-2 text-sm text-slate-400">Net P&amp;L estimate: <span className={`${totalPnl >= 0 ? "text-emerald-400" : "text-rose-400"}`}>{totalPnl >= 0 ? "+" : ""}₹{Math.abs(totalPnl).toFixed(0)}</span></p>
+          <p className="mt-2 text-sm text-slate-400">
+            Net P&amp;L estimate: <span className={`${totalPnl >= 0 ? "text-emerald-400" : "text-rose-400"}`}>{totalPnl >= 0 ? "+" : ""}₹{Math.abs(totalPnl).toFixed(0)}</span>
+            {perfLoading ? <span className="ml-2 text-xs text-slate-500">(refreshing market data...)</span> : null}
+          </p>
         </section>
       </section>
 

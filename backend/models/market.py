@@ -18,4 +18,5 @@ class OhlcvResponse(BaseModel):
     symbol: str
     interval: str
     period: str
+    source: str = "live"
     candles: list[Candle]

@@ -1,32 +1,91 @@
+import { useEffect, useMemo, useRef } from "react";
+import { AreaSeries, ColorType, LineSeries, createChart, type IChartApi, type UTCTimestamp } from "lightweight-charts";
+
 type Props = {
   values: number[];
 };
 
 export function PerformanceChart({ values }: Props) {
+  const containerRef = useRef<HTMLDivElement | null>(null);
+  const chartRef = useRef<IChartApi | null>(null);
+
+  const series = useMemo(() => {
+    const now = Date.now();
+    const dayMs = 24 * 60 * 60 * 1000;
+    return values.map((v, i) => ({
+      time: Math.floor((now - (values.length - i) * dayMs) / 1000) as UTCTimestamp,
+      value: v,
+    }));
+  }, [values]);
+
+  useEffect(() => {
+    if (!containerRef.current || series.length === 0) return;
+
+    const width = containerRef.current.clientWidth || 900;
+    const height = containerRef.current.clientHeight || 240;
+
+    const chart = createChart(containerRef.current, {
+      width,
+      height,
+      layout: {
+        background: { type: ColorType.Solid, color: "#050b16" },
+        textColor: "#94a3b8",
+      },
+      grid: {
+        vertLines: { color: "#0f172a" },
+        horzLines: { color: "#0f172a" },
+      },
+      timeScale: { borderColor: "#1e293b", timeVisible: false },
+      rightPriceScale: { borderColor: "#1e293b" },
+      crosshair: {
+        vertLine: { color: "#334155" },
+        horzLine: { color: "#334155" },
+      },
+    });
+    chartRef.current = chart;
+
+    const area = chart.addSeries(AreaSeries, {
+      lineColor: "#9fb4ff",
+      topColor: "rgba(127, 145, 255, 0.25)",
+      bottomColor: "rgba(127, 145, 255, 0.03)",
+      lineWidth: 2,
+      priceLineVisible: true,
+      lastValueVisible: true,
+    });
+    area.setData(series);
+
+    const base = series[0]?.value ?? 100;
+    const baseline = chart.addSeries(LineSeries, {
+      color: "rgba(148, 163, 184, 0.45)",
+      lineWidth: 1,
+      lineStyle: 2,
+      priceLineVisible: false,
+      lastValueVisible: false,
+    });
+    baseline.setData([
+      { time: series[0].time, value: base },
+      { time: series[series.length - 1].time, value: base },
+    ]);
+
+    chart.timeScale().fitContent();
+
+    const observer = new ResizeObserver((entries) => {
+      const entry = entries[0];
+      if (!entry || !chartRef.current) return;
+      chartRef.current.applyOptions({
+        width: Math.max(320, Math.floor(entry.contentRect.width)),
+        height: Math.max(180, Math.floor(entry.contentRect.height)),
+      });
+    });
+    observer.observe(containerRef.current);
+
+    return () => {
+      observer.disconnect();
+      chart.remove();
+      chartRef.current = null;
+    };
+  }, [series]);
+
   if (!values.length) return <div className="h-full w-full rounded bg-slate-950/60" />;
-
-  const width = 900;
-  const height = 240;
-  const pad = 20;
-  const min = Math.min(...values);
-  const max = Math.max(...values);
-  const span = Math.max(1, max - min);
-  const toX = (i: number) => pad + (i / Math.max(1, values.length - 1)) * (width - pad * 2);
-  const toY = (v: number) => height - pad - ((v - min) / span) * (height - pad * 2);
-  const line = values.map((v, i) => `${i === 0 ? "M" : "L"}${toX(i)},${toY(v)}`).join(" ");
-  const area = `${line} L ${toX(values.length - 1)},${height - pad} L ${toX(0)},${height - pad} Z`;
-
-  return (
-    <svg viewBox={`0 0 ${width} ${height}`} className="h-full w-full rounded-lg">
-      <defs>
-        <linearGradient id="perfFill" x1="0" y1="0" x2="0" y2="1">
-          <stop offset="0%" stopColor="#818cf8" stopOpacity="0.35" />
-          <stop offset="100%" stopColor="#818cf8" stopOpacity="0.03" />
-        </linearGradient>
-      </defs>
-      <rect width={width} height={height} fill="#090f1a" />
-      <path d={area} fill="url(#perfFill)" />
-      <path d={line} stroke="#a5b4fc" strokeWidth="2.2" fill="none" />
-    </svg>
-  );
+  return <div ref={containerRef} className="h-full w-full rounded-lg" />;
 }
